@@ -17,7 +17,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:migrate": "tsx src/db/migrate.ts",
-    "db:migrate:down": "tsx src/db/migrate.ts down"
+    "db:migrate:down": "tsx src/db/migrate.ts down",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:setup": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
     "dotenv": "^17.2.2",
