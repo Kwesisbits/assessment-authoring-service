@@ -3,11 +3,14 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastif
 import { registerErrorHandler } from './http/errors.js';
 import { authoringRoutes } from './routes/authoring.js';
 import { contentAuthoringRoutes } from './routes/content-authoring.js';
+import { publicationRoutes } from './routes/publications.js';
 import type { AuthoringServicePort } from './services/authoring-service.js';
+import type { PublishingServicePort } from './services/publishing-service.js';
 
 interface BuildAppOptions {
   logger?: FastifyServerOptions['logger'];
   authoringService?: AuthoringServicePort;
+  publishingService?: PublishingServicePort;
   onClose?: () => Promise<void>;
 }
 
@@ -26,6 +29,12 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     });
     void app.register(contentAuthoringRoutes, {
       service: options.authoringService,
+    });
+  }
+
+  if (options.publishingService) {
+    void app.register(publicationRoutes, {
+      service: options.publishingService,
     });
   }
 

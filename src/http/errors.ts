@@ -68,6 +68,16 @@ export function crossToolMove(): AppError {
   });
 }
 
+export function publicationInvalid(violations: ValidationViolation[]): AppError {
+  return new AppError({
+    status: 422,
+    code: 'publication_validation_failed',
+    title: 'Publication validation failed',
+    detail: `The draft cannot be published until ${violations.length} validation ${violations.length === 1 ? 'error is' : 'errors are'} fixed.`,
+    violations,
+  });
+}
+
 export function registerErrorHandler(app: FastifyInstance): void {
   app.setErrorHandler((error, request, reply) => {
     if (!(error instanceof AppError)) {

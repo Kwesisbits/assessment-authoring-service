@@ -46,6 +46,14 @@ export class AssessmentToolRepository {
       .executeTakeFirst();
   }
 
+  async findById(database: DatabaseConnection, id: string): Promise<AssessmentToolRow | undefined> {
+    return database
+      .selectFrom('assessment_tools')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst();
+  }
+
   async findActiveByIdForUpdate(
     transaction: Transaction<Database>,
     id: string,

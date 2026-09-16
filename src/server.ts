@@ -2,11 +2,13 @@ import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
 import { createDatabase } from './db/index.js';
 import { AuthoringService } from './services/authoring-service.js';
+import { PublishingService } from './services/publishing-service.js';
 
 const config = loadConfig();
 const database = createDatabase(config.databaseUrl);
 const app = buildApp({
   authoringService: new AuthoringService(database),
+  publishingService: new PublishingService(database),
   logger: {
     level: config.logLevel,
   },

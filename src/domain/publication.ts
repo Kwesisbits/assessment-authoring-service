@@ -49,3 +49,11 @@ export interface PublicationSnapshot extends PublishableAssessmentTool {
   version: number;
   publishedAt: string;
 }
+
+export interface PublicationSummary {
+  publicationId: string;
+  toolId: string;
+  version: number;
+  language: string;
+  publishedAt: string;
+}

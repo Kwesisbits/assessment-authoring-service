@@ -8,9 +8,7 @@ import type {
   CreateToolInput,
   MoveStepInput,
   MoveTaskInput,
-  StepDraft,
   StepResult,
-  TaskDraft,
   TaskResult,
   UpdateStepInput,
   UpdateTaskInput,
@@ -18,11 +16,11 @@ import type {
 } from '../domain/assessment-tool.js';
 import type { AssessmentToolsTable, Database, StepsTable, TasksTable } from '../db/types.js';
 import { crossToolMove, invalidPosition, notFound, revisionConflict } from '../http/errors.js';
+import { mapDraft, mapStep, mapSummary, mapTask } from '../mappers/assessment-tool-mapper.js';
 import {
   AssessmentToolRepository,
   type AssessmentToolRow,
   type StepRow,
-  type TaskRow,
 } from '../repositories/assessment-tool-repository.js';
 import { ContentRepository, type TaskContextRow } from '../repositories/content-repository.js';
 
@@ -408,71 +406,6 @@ export class AuthoringService implements AuthoringServicePort {
     ]);
     return mapDraft(tool, steps, tasks);
   }
-}
-
-function mapDraft(
-  tool: AssessmentToolRow,
-  stepRows: StepRow[],
-  taskRows: TaskRow[],
-): AssessmentToolDraft {
-  const tasksByStep = new Map<string, TaskRow[]>();
-  for (const task of taskRows) {
-    const siblings = tasksByStep.get(task.step_id) ?? [];
-    siblings.push(task);
-    tasksByStep.set(task.step_id, siblings);
-  }
-
-  const steps: StepDraft[] = stepRows.map((step) => mapStep(step, tasksByStep.get(step.id) ?? []));
-
-  return {
-    ...mapSummary(tool),
-    steps,
-  };
-}
-
-function mapSummary(tool: AssessmentToolRow): AssessmentToolSummary {
-  const benchmark =
-    tool.benchmark_value === null || tool.benchmark_unit === null
-      ? null
-      : {
-          value: Number(tool.benchmark_value),
-          unit: tool.benchmark_unit,
-        };
-
-  return {
-    id: tool.id,
-    title: tool.title,
-    grade: tool.grade,
-    language: tool.language,
-    benchmark,
-    revision: tool.draft_revision,
-    createdAt: tool.created_at.toISOString(),
-    updatedAt: tool.updated_at.toISOString(),
-  };
-}
-
-function mapStep(step: StepRow, tasks: TaskRow[]): StepDraft {
-  return {
-    id: step.id,
-    title: step.title,
-    script: step.script,
-    position: step.position,
-    tasks: tasks.map(mapTask),
-  };
-}
-
-function mapTask(task: TaskRow): TaskDraft {
-  return {
-    id: task.id,
-    type: task.type,
-    prompt: task.prompt,
-    position: task.position,
-    passage: task.passage,
-    wordCount: task.word_count,
-    durationSeconds: task.duration_seconds,
-    stopAfterErrors: task.stop_after_errors,
-    options: task.options,
-  };
 }
 
 function assertPosition(position: number, maximum: number): void {
