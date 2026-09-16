@@ -1,22 +1,20 @@
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-import { FileMigrationProvider, Migrator } from 'kysely';
+import { Migrator, type MigrationProvider } from 'kysely';
 
 import { loadConfig } from '../config.js';
 import { createDatabase } from './index.js';
+import * as initialMigration from './migrations/001_initial.js';
 
-const migrationsFolder = path.join(path.dirname(fileURLToPath(import.meta.url)), 'migrations');
+const migrationProvider: MigrationProvider = {
+  getMigrations: () =>
+    Promise.resolve({
+      '001_initial': initialMigration,
+    }),
+};
 const config = loadConfig();
 const database = createDatabase(config.databaseUrl);
 const migrator = new Migrator({
   db: database,
-  provider: new FileMigrationProvider({
-    fs,
-    path,
-    migrationFolder: migrationsFolder,
-  }),
+  provider: migrationProvider,
 });
 
 try {
