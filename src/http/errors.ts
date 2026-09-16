@@ -78,6 +78,35 @@ export function publicationInvalid(violations: ValidationViolation[]): AppError 
   });
 }
 
+export function invalidSyncCursor(detail: string): AppError {
+  return new AppError({
+    status: 400,
+    code: 'invalid_sync_cursor',
+    title: 'Invalid sync cursor',
+    detail,
+  });
+}
+
+export function syncCursorAhead(): AppError {
+  return new AppError({
+    status: 409,
+    code: 'sync_cursor_ahead',
+    title: 'Sync cursor is ahead of the server',
+    detail:
+      'The supplied cursor refers to content newer than this server has. Restart synchronization without a cursor.',
+  });
+}
+
+export function publishedToolLanguageImmutable(): AppError {
+  return new AppError({
+    status: 409,
+    code: 'published_tool_language_immutable',
+    title: 'Published tool language cannot change',
+    detail:
+      'Language is part of a tool’s identity after publication. Create a new tool for content in another language.',
+  });
+}
+
 export function registerErrorHandler(app: FastifyInstance): void {
   app.setErrorHandler((error, request, reply) => {
     if (!(error instanceof AppError)) {

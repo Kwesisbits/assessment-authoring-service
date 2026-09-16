@@ -3,14 +3,17 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastif
 import { registerErrorHandler } from './http/errors.js';
 import { authoringRoutes } from './routes/authoring.js';
 import { contentAuthoringRoutes } from './routes/content-authoring.js';
+import { deviceSyncRoutes } from './routes/device-sync.js';
 import { publicationRoutes } from './routes/publications.js';
 import type { AuthoringServicePort } from './services/authoring-service.js';
+import type { DeviceSyncServicePort } from './services/device-sync-service.js';
 import type { PublishingServicePort } from './services/publishing-service.js';
 
 interface BuildAppOptions {
   logger?: FastifyServerOptions['logger'];
   authoringService?: AuthoringServicePort;
   publishingService?: PublishingServicePort;
+  deviceSyncService?: DeviceSyncServicePort;
   onClose?: () => Promise<void>;
 }
 
@@ -35,6 +38,12 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   if (options.publishingService) {
     void app.register(publicationRoutes, {
       service: options.publishingService,
+    });
+  }
+
+  if (options.deviceSyncService) {
+    void app.register(deviceSyncRoutes, {
+      service: options.deviceSyncService,
     });
   }
 

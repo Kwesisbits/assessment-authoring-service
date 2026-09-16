@@ -15,7 +15,13 @@ import type {
   UpdateToolInput,
 } from '../domain/assessment-tool.js';
 import type { AssessmentToolsTable, Database, StepsTable, TasksTable } from '../db/types.js';
-import { crossToolMove, invalidPosition, notFound, revisionConflict } from '../http/errors.js';
+import {
+  crossToolMove,
+  invalidPosition,
+  notFound,
+  publishedToolLanguageImmutable,
+  revisionConflict,
+} from '../http/errors.js';
 import { mapDraft, mapStep, mapSummary, mapTask } from '../mappers/assessment-tool-mapper.js';
 import {
   AssessmentToolRepository,
@@ -23,6 +29,7 @@ import {
   type StepRow,
 } from '../repositories/assessment-tool-repository.js';
 import { ContentRepository, type TaskContextRow } from '../repositories/content-repository.js';
+import { PublicationRepository } from '../repositories/publication-repository.js';
 
 export interface AuthoringServicePort {
   createTool(input: CreateToolInput): Promise<AssessmentToolDraft>;
@@ -51,6 +58,7 @@ export class AuthoringService implements AuthoringServicePort {
     private readonly database: Kysely<Database>,
     private readonly tools = new AssessmentToolRepository(),
     private readonly content = new ContentRepository(),
+    private readonly publications = new PublicationRepository(),
   ) {}
 
   async createTool(input: CreateToolInput): Promise<AssessmentToolDraft> {
@@ -84,6 +92,14 @@ export class AuthoringService implements AuthoringServicePort {
   ): Promise<AssessmentToolDraft> {
     return this.database.transaction().execute(async (transaction) => {
       const current = await this.lockCurrentRevision(transaction, id, expectedRevision);
+      if (
+        input.language !== undefined &&
+        input.language !== current.language &&
+        (await this.publications.existsForTool(transaction, id))
+      ) {
+        throw publishedToolLanguageImmutable();
+      }
+
       const values: Updateable<AssessmentToolsTable> = {
         draft_revision: current.draft_revision + 1,
         updated_at: new Date(),

@@ -2,10 +2,21 @@ import { sql, type Insertable, type Kysely, type Selectable, type Transaction } 
 
 import type { Database, JsonValue, PublishedVersionsTable } from '../db/types.js';
 import type { PublicationSnapshot } from '../domain/publication.js';
+import type { DatabaseConnection } from './assessment-tool-repository.js';
 
 export type PublicationRow = Selectable<PublishedVersionsTable>;
 
 export class PublicationRepository {
+  async existsForTool(database: DatabaseConnection, toolId: string): Promise<boolean> {
+    const publication = await database
+      .selectFrom('published_versions')
+      .select('id')
+      .where('tool_id', '=', toolId)
+      .limit(1)
+      .executeTakeFirst();
+    return publication !== undefined;
+  }
+
   async nextVersion(transaction: Transaction<Database>, toolId: string): Promise<number> {
     const result = await transaction
       .selectFrom('published_versions')
@@ -79,5 +90,32 @@ export class PublicationRepository {
       .selectAll()
       .where('id', '=', publicationId)
       .executeTakeFirst();
+  }
+
+  async getHighWatermark(transaction: Transaction<Database>, language: string): Promise<string> {
+    const state = await transaction
+      .selectFrom('language_sync_state')
+      .select('last_sequence')
+      .where('language', '=', language)
+      .executeTakeFirst();
+    return state?.last_sequence ?? '0';
+  }
+
+  async findLatestChanges(
+    transaction: Transaction<Database>,
+    language: string,
+    afterSequence: string,
+    throughSequence: string,
+  ): Promise<PublicationRow[]> {
+    return transaction
+      .selectFrom('published_versions')
+      .distinctOn('tool_id')
+      .selectAll()
+      .where('language', '=', language)
+      .where('sync_sequence', '>', afterSequence)
+      .where('sync_sequence', '<=', throughSequence)
+      .orderBy('tool_id')
+      .orderBy('sync_sequence', 'desc')
+      .execute();
   }
 }

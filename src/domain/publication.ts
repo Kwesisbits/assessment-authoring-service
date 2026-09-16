@@ -57,3 +57,8 @@ export interface PublicationSummary {
   language: string;
   publishedAt: string;
 }
+
+export interface DeviceSyncResponse {
+  cursor: string;
+  tools: PublicationSnapshot[];
+}
