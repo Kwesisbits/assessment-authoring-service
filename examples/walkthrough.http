@@ -1,0 +1,77 @@
+@baseUrl = http://localhost:3000
+
+### 1. Create an intentionally incomplete draft
+# @name createTool
+POST {{baseUrl}}/tools
+Content-Type: application/json
+
+{
+  "title": "Walkthrough Reading Assessment",
+  "grade": "3",
+  "language": null,
+  "benchmark": null
+}
+
+### 2. Add its first step
+# @name createStep
+POST {{baseUrl}}/tools/{{createTool.response.body.$.id}}/steps
+Content-Type: application/json
+If-Match: {{createTool.response.headers.ETag}}
+
+{
+  "title": "Oral reading",
+  "script": "Read this out loud."
+}
+
+### 3. Add an incomplete reading task
+# @name createTask
+POST {{baseUrl}}/steps/{{createStep.response.body.$.step.id}}/tasks
+Content-Type: application/json
+If-Match: {{createStep.response.headers.ETag}}
+
+{
+  "type": "reading",
+  "prompt": "Read the passage aloud."
+}
+
+### 4. Publishing fails with all missing fields at once
+POST {{baseUrl}}/tools/{{createTool.response.body.$.id}}/publications
+If-Match: {{createTask.response.headers.ETag}}
+
+### 5. Fix the tool metadata
+# @name fixTool
+PATCH {{baseUrl}}/tools/{{createTool.response.body.$.id}}
+Content-Type: application/json
+If-Match: {{createTask.response.headers.ETag}}
+
+{
+  "language": "isiZulu",
+  "benchmark": {
+    "value": 35,
+    "unit": "words/min"
+  }
+}
+
+### 6. Fix the reading task
+# @name fixTask
+PATCH {{baseUrl}}/tasks/{{createTask.response.body.$.task.id}}
+Content-Type: application/json
+If-Match: {{fixTool.response.headers.ETag}}
+
+{
+  "passage": "ULindiwe ufunda indaba emfushane nomngane wakhe ngemva kwesikole.",
+  "wordCount": 8,
+  "durationSeconds": 60
+}
+
+### 7. Publish the valid draft
+# @name publishTool
+POST {{baseUrl}}/tools/{{createTool.response.body.$.id}}/publications
+If-Match: {{fixTask.response.headers.ETag}}
+
+### 8. Fetch published isiZulu content as a device
+# @name initialSync
+GET {{baseUrl}}/device/tools?language=isiZulu
+
+### 9. Repeat from the returned cursor; no already-seen tools are returned
+GET {{baseUrl}}/device/tools?language=isiZulu&cursor={{initialSync.response.body.$.cursor}}

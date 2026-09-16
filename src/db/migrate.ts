@@ -1,21 +1,10 @@
-import { Migrator, type MigrationProvider } from 'kysely';
-
 import { loadConfig } from '../config.js';
 import { createDatabase } from './index.js';
-import * as initialMigration from './migrations/001_initial.js';
+import { createMigrator } from './migrator.js';
 
-const migrationProvider: MigrationProvider = {
-  getMigrations: () =>
-    Promise.resolve({
-      '001_initial': initialMigration,
-    }),
-};
 const config = loadConfig();
 const database = createDatabase(config.databaseUrl);
-const migrator = new Migrator({
-  db: database,
-  provider: migrationProvider,
-});
+const migrator = createMigrator(database);
 
 try {
   const command = process.argv[2];

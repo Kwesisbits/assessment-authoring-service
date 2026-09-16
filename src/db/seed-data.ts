@@ -11,6 +11,12 @@ export const seedIds = {
   brokenEmptyStep: '34444444-4444-4444-8444-444444444444',
   brokenReadingStep: '35555555-5555-4555-8555-555555555555',
   brokenChoiceStep: '36666666-6666-4666-8666-666666666666',
+  consentTask: '41111111-1111-4111-8111-111111111111',
+  booksTask: '42222222-2222-4222-8222-222222222222',
+  readingCompanionTask: '43333333-3333-4333-8333-333333333333',
+  readingTask: '44444444-4444-4444-8444-444444444444',
+  brokenReadingTask: '45555555-5555-4555-8555-555555555555',
+  brokenChoiceTask: '46666666-6666-4666-8666-666666666666',
 } as const;
 
 export const seedIsiZuluPassage =
@@ -127,7 +133,7 @@ export async function seedDatabase(database: Kysely<Database>): Promise<void> {
       .insertInto('tasks')
       .values([
         {
-          id: '41111111-1111-4111-8111-111111111111',
+          id: seedIds.consentTask,
           step_id: seedIds.consentStep,
           type: 'survey',
           prompt: 'Did the learner agree?',
@@ -139,7 +145,7 @@ export async function seedDatabase(database: Kysely<Database>): Promise<void> {
           options: null,
         },
         {
-          id: '42222222-2222-4222-8222-222222222222',
+          id: seedIds.booksTask,
           step_id: seedIds.contextStep,
           type: 'survey',
           prompt: 'Do you have books at home?',
@@ -151,7 +157,7 @@ export async function seedDatabase(database: Kysely<Database>): Promise<void> {
           options: null,
         },
         {
-          id: '43333333-3333-4333-8333-333333333333',
+          id: seedIds.readingCompanionTask,
           step_id: seedIds.contextStep,
           type: 'survey',
           prompt: 'Who reads with you?',
@@ -163,7 +169,7 @@ export async function seedDatabase(database: Kysely<Database>): Promise<void> {
           options: null,
         },
         {
-          id: '44444444-4444-4444-8444-444444444444',
+          id: seedIds.readingTask,
           step_id: seedIds.readingStep,
           type: 'reading',
           prompt: 'Read the passage aloud.',
@@ -175,7 +181,7 @@ export async function seedDatabase(database: Kysely<Database>): Promise<void> {
           options: null,
         },
         {
-          id: '45555555-5555-4555-8555-555555555555',
+          id: seedIds.brokenReadingTask,
           step_id: seedIds.brokenReadingStep,
           type: 'reading',
           prompt: 'This reading task is intentionally incomplete.',
@@ -187,7 +193,7 @@ export async function seedDatabase(database: Kysely<Database>): Promise<void> {
           options: null,
         },
         {
-          id: '46666666-6666-4666-8666-666666666666',
+          id: seedIds.brokenChoiceTask,
           step_id: seedIds.brokenChoiceStep,
           type: 'multiple_choice',
           prompt: 'This task intentionally has duplicate options.',
