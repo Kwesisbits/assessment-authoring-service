@@ -1,10 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 
-export interface Violation {
-  code: string;
-  path: string;
-  message: string;
-}
+import type { ValidationViolation } from '../domain/validate-publication.js';
+
+export type Violation = ValidationViolation;
 
 interface AppErrorOptions {
   status: number;
