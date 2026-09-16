@@ -1,11 +1,16 @@
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
+import { createDatabase } from './db/index.js';
+import { AuthoringService } from './services/authoring-service.js';
 
 const config = loadConfig();
+const database = createDatabase(config.databaseUrl);
 const app = buildApp({
+  authoringService: new AuthoringService(database),
   logger: {
     level: config.logLevel,
   },
+  onClose: () => database.destroy(),
 });
 
 const closeGracefully = async (signal: NodeJS.Signals): Promise<void> => {
