@@ -39,6 +39,16 @@ describe('authoring routes', () => {
       getTool: vi.fn().mockResolvedValue(draft),
       updateTool,
       archiveTool: vi.fn().mockResolvedValue(2),
+      createStep: vi.fn(),
+      getStep: vi.fn(),
+      updateStep: vi.fn(),
+      deleteStep: vi.fn(),
+      moveStep: vi.fn(),
+      createTask: vi.fn(),
+      getTask: vi.fn(),
+      updateTask: vi.fn(),
+      deleteTask: vi.fn(),
+      moveTask: vi.fn(),
     };
     app = buildApp({ authoringService: service });
   });

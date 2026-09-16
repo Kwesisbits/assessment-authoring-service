@@ -52,6 +52,24 @@ export function revisionConflict(expected: number, current: number): AppError {
   });
 }
 
+export function invalidPosition(position: number, minimum: number, maximum: number): AppError {
+  return new AppError({
+    status: 400,
+    code: 'invalid_position',
+    title: 'Invalid position',
+    detail: `Position ${position} is outside the allowed range ${minimum}–${maximum}.`,
+  });
+}
+
+export function crossToolMove(): AppError {
+  return new AppError({
+    status: 400,
+    code: 'cross_tool_move_not_allowed',
+    title: 'Cross-tool move not allowed',
+    detail: 'A task can only move between steps in the same assessment tool.',
+  });
+}
+
 export function registerErrorHandler(app: FastifyInstance): void {
   app.setErrorHandler((error, request, reply) => {
     if (!(error instanceof AppError)) {

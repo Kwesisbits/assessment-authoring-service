@@ -2,6 +2,7 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastif
 
 import { registerErrorHandler } from './http/errors.js';
 import { authoringRoutes } from './routes/authoring.js';
+import { contentAuthoringRoutes } from './routes/content-authoring.js';
 import type { AuthoringServicePort } from './services/authoring-service.js';
 
 interface BuildAppOptions {
@@ -21,6 +22,9 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
 
   if (options.authoringService) {
     void app.register(authoringRoutes, {
+      service: options.authoringService,
+    });
+    void app.register(contentAuthoringRoutes, {
       service: options.authoringService,
     });
   }
